@@ -24,6 +24,10 @@
    - Policy observes
    - Observability records
    - Core executes
+8. Keep a controller loop around execution:
+   - Planner → Executor → Evaluator → Controller → back to context
+   - detect stagnation (same plan + same output)
+   - inject movement via direction shift/state mutation when stagnant
 
 ## Non-negotiable constraints
 Copilot MUST NOT:

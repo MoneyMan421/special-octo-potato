@@ -1,6 +1,6 @@
 import unittest
 
-from app.main import handle_request
+from app.main import controller, evaluator, handle_request
 from observability.audit import AuditLogger
 
 
@@ -28,6 +28,22 @@ class FlowTests(unittest.TestCase):
         self.assertEqual(result, payload)
         warning_events = [r for r in records if r["event"] == "policy_warning"]
         self.assertEqual(len(warning_events), 1)
+
+    def test_stagnation_detection_and_flow_injection(self) -> None:
+        context = {
+            "iteration": 1,
+            "direction": "forward",
+            "last_plan": "forward:step-1",
+            "last_output": {"message": "same"},
+        }
+
+        evaluation = evaluator(context, "forward:step-1", {"message": "same"})
+        action = controller(context, evaluation)
+
+        self.assertTrue(evaluation["stagnant"])
+        self.assertEqual(action, "direction_shift")
+        self.assertEqual(context["direction"], "shift-2")
+        self.assertEqual(context["mutation_count"], 1)
 
 
 if __name__ == "__main__":
